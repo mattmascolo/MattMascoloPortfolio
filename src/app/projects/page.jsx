@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
 import logoMWDesign from '@/images/logos/mwdesignlogo.png'
-import logoLearnArena from '@/images/logos/learnArena.png'
+import logoLearnArena from '@/images/logos/learnarena.png'
 import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
 
 const projects = [
