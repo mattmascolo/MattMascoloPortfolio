@@ -239,7 +239,7 @@ export default async function Home() {
           Web Developer, Co-Founder, and Lifelong Learner.
           </h1>
           <p className="mt-6 text-base text-zinc-600 dark:text-zinc-400">
-          I'm Matt Mascolo, a seasoned web developer and entrepreneur based out of Colorado. As the co-founder of Learn Arena, we're focused on leveraging technology to democratize education, providing people with a competitive, engaging platform to learn and grow on their own terms.
+          I&apos;m Matt Mascolo, a seasoned web developer and entrepreneur based out of Colorado. As the co-founder of Learn Arena, we&apos;re focused on leveraging technology to democratize education, providing people with a competitive, engaging platform to learn and grow on their own terms.
           </p>
           <div className="mt-6 flex gap-6">
             <SocialLink
