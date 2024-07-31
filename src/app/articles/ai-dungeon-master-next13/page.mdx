@@ -1,0 +1,125 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Matt Mascolo',
+  date: '2023-08-08',
+  title: 'AI Dungeon Master: Blending Next.js 13 with OpenAI for Interactive D&D Adventures',
+  description:
+    'Explore the technical intricacies of AI Dungeon Master, a project that combines Next.js 13, React, OpenAI, and Supabase to create an intelligent, responsive Dungeon Master for tabletop RPG enthusiasts.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+As a developer who loves both coding and tabletop RPGs, I wanted to create something that combined these passions. That's how AI Dungeon Master was born. Launched on August 8, 2023, this project showcases how modern web technologies and AI can come together to create a unique, interactive experience for D&D fans.
+
+## The Tech Behind the Magic
+
+AI Dungeon Master is built on a robust stack of modern technologies:
+
+- **Next.js 13.4.19**: I used the latest version of Next.js, taking advantage of its new App Router for better routing and performance.
+- **React 18.2.0**: The latest React version powers the responsive user interface.
+- **TypeScript 5.1.6**: For improved code quality and type safety throughout the project.
+- **OpenAI API**: The GPT-3.5-turbo model generates intelligent, context-aware responses.
+- **Supabase**: Handles user authentication and data management securely.
+- **Tailwind CSS 3.3.3**: Creates a clean, responsive design using utility-first CSS.
+
+## Key Features and Code Insights
+
+### 1. The AI Dungeon Master
+
+The core of the project is the AI that generates dynamic narratives. Here's how it works:
+
+```javascript
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const { content } = body;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {
+        "role": "user",
+        "content": `
+        You are a dungeon master running an adventure. Keep your message to 80 words or less.
+        End every message with a prompt to roll a die to see if the player succeeds or fails.
+        
+        ${content}
+        `
+      }
+    ],
+    temperature: 1,
+    max_tokens: 256,
+    top_p: 1,
+    frequency_penalty: 0,
+    presence_penalty: 0,
+  });
+
+  return NextResponse.json({ response });
+}
+```
+This code shows how I integrated OpenAI's API to create a responsive Dungeon Master. It processes player actions and generates appropriate responses, always ending with a prompt for the next dice roll.
+
+### 2. Real-time Gameplay
+
+The Adventure component manages the game state and user interactions:
+
+```javascript
+export default function Adventure() {
+  const [prompt, setPrompt] = useState("You awake in a dark chamber...");
+  const [roll, setRoll] = useState(0);
+  const [doNext, setDoNext] = useState('');
+
+  const rollDie = () => {
+    const currentRoll = Math.floor(Math.random() * 20) + 1
+    setRoll(currentRoll)
+    fetchData(currentRoll);
+  };
+
+  // ... (rest of the component)
+}
+```
+This component handles the game state, user input, and integrates with the AI to create a smooth gaming experience.
+
+### 3. Secure Login with Supabase
+
+I implemented user authentication using Supabase:
+
+```javascript
+export default function Login() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    // Error handling and redirection logic
+  }
+
+  // ... (rest of the component)
+}
+```
+## Overcoming Challenges
+
+One of the main hurdles was ensuring the AI responses stayed relevant to the game context. I tackled this by fine-tuning the prompts sent to the OpenAI API and implementing a state management system to track the game's progress.
+
+Another challenge was optimizing the app's performance, particularly with real-time AI interactions. I addressed this by using efficient React patterns and leveraging Next.js 13's performance features.
+
+## What's Next for AI Dungeon Master
+
+I have several ideas for future enhancements:
+
+1. Adding WebSocket support for multiplayer adventures
+2. Expanding the AI's ability to handle more complex game scenarios
+3. Creating a custom character creation system that integrates with the AI
+4. Developing an AI-powered map generator
+
+## Wrapping Up
+
+AI Dungeon Master combines my love for gaming with my software development skills. It demonstrates my ability to work with full-stack development, API integration, and create complex, interactive applications.
+
+Feel free to explore the [GitHub repository](https://github.com/mattmascolo/ai-dm) for a closer look at the code.
