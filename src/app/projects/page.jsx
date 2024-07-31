@@ -22,6 +22,13 @@ const projects = [
     logo: logoMWDesign,
   },
   {
+    name: 'Artificial Intelligent Dungeon Master',
+    description:
+      'A web application that uses artificial intelligence to dynamically generate encounters for a Dungeons & Dragons campaign.',
+    link: { href: '#', label: 'Link N/A' },
+    logo: logoOpenShuttle,
+  },
+  {
     name: 'More to come',
     description:
       'Working on compiling some more of my work here!',
@@ -43,13 +50,13 @@ function LinkIcon(props) {
 
 export const metadata = {
   title: 'Projects',
-  description: 'Significant Projects in My Web Development Career.',
+  description: 'A Few Projects.',
 }
 
 export default function Projects() {
   return (
     <SimpleLayout
-      title="Significant Projects in My Web Development Career."
+      title="A Few Projects."
       intro="Throughout my career, I have been involved in a range of projects that have allowed me to apply and expand my web development skills. Highlighted below are some of the key projects that I take particular pride in. These projects exemplify the breadth of my work, from creating dynamic websites to recording and producing engaging podcasts, and even to implementing GIS technology for urban planning. Please take a moment to explore these and get a better understanding of my professional experience and areas of expertise."
     >
       <ul
