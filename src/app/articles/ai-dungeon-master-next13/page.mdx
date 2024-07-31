@@ -107,6 +107,8 @@ export default function Login() {
 
 One of the main hurdles was ensuring the AI responses stayed relevant to the game context. I tackled this by fine-tuning the prompts sent to the OpenAI API and implementing a state management system to track the game's progress.
 
+As the context window grows, using Supabase's Postgres database to store the prompts becomes crucial. This allows me to pass the last 10 prompts to GPT for summarization. In turn, using a condensed version of the game's context to continue playing.
+
 Another challenge was optimizing the app's performance, particularly with real-time AI interactions. I addressed this by using efficient React patterns and leveraging Next.js 13's performance features.
 
 ## What's Next for AI Dungeon Master
