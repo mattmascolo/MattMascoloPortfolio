@@ -18,25 +18,25 @@ const projects = [
     logo: logoLearnArena,
   },
   {
-    name: 'MW Website Design',
-    description:
-      'Personal website deisgn & development company specializing in digital marketing for resorts and hotels with a focus on simplicity.',
-    link: { href: 'https://webdesign.mascolo.co/', label: 'webdesign.mascolo.co' },
-    logo: logoMWDesign,
-  },
-  {
-    name: 'Artificial Intelligent Dungeon Master',
+    name: 'Using AI as a Dungeon Master',
     description:
       'A web application that uses artificial intelligence to dynamically generate encounters for a Dungeons & Dragons campaign.',
     link: { href: '/articles/ai-dungeon-master-next13', label: 'Read More' },
     logo: logoOpenShuttle,
   },
   {
-    name: 'Crossplay Photo Share with Expo',
+    name: 'Mobile App: Share Photos Across Devices',
     description:
       'React Native app that solves the perennial problem of sharing high-resolution photos between iOS and Android devices.',
     link: { href: '/articles/expo-crossplay-photo-share', label: 'Read More' },
     logo: logoOpenShuttle,
+  },
+  {
+    name: 'MW Website Design',
+    description:
+      'Personal website deisgn & development company specializing in digital marketing for resorts and hotels with a focus on simplicity.',
+    link: { href: 'https://webdesign.mascolo.co/', label: 'webdesign.mascolo.co' },
+    logo: logoMWDesign,
   },
   {
     name: 'More to come',
