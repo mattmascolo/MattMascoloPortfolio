@@ -32,7 +32,7 @@ Crossplay Photo Share is built with a modern, efficient tech stack:
 
 One of the core challenges was ensuring consistent file handling across both iOS and Android. Here's a snippet that demonstrates how we download and save files:
 
-``javascript
+```javascript
 const downloadAll = async (user: any) => {
   const { data } = await supabase.storage.from('files').list(user.id);
   if (data && data.length > 0) {
@@ -46,14 +46,14 @@ const downloadAll = async (user: any) => {
     }
   }
 };
-
+```
 This function fetches all files for a user from Supabase storage, downloads them, and saves them to the device's media library, maintaining full resolution across platforms.
 
 ### 2. Permissions Management
 
 Handling permissions was a significant challenge, especially given the differences between iOS and Android. We used Expo's permission APIs to ensure a smooth user experience:
 
-``json
+```json
 "plugins": [
   [
     "expo-image-picker",
@@ -72,14 +72,14 @@ Handling permissions was a significant challenge, especially given the differenc
     }
   ]
 ]
-
+```
 This configuration in `app.json` ensures that we request the necessary permissions on both platforms, with user-friendly messages explaining why we need access to their media.
 
 ### 3. Efficient Navigation with Expo Router
 
 We utilized Expo Router for navigation, which allowed for a more web-like navigation experience and easier deep linking:
 
-``javascript
+```javascript
 const StackLayout = () => {
   return (
     <Stack
@@ -103,7 +103,7 @@ const StackLayout = () => {
     </Stack>
   );
 };
-
+```
 This setup provides a consistent navigation experience across both platforms, with custom header buttons for key actions like logging out and batch downloading.
 
 ## Overcoming Challenges

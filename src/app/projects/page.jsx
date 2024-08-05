@@ -25,7 +25,14 @@ const projects = [
     name: 'Artificial Intelligent Dungeon Master',
     description:
       'A web application that uses artificial intelligence to dynamically generate encounters for a Dungeons & Dragons campaign.',
-    link: { href: '#', label: 'Link N/A' },
+    link: { href: '/articles/ai-dungeon-master-next13', label: 'Read More' },
+    logo: logoOpenShuttle,
+  },
+  {
+    name: 'Crossplay Photo Share with Expo',
+    description:
+      'React Native app that solves the perennial problem of sharing high-resolution photos between iOS and Android devices.',
+    link: { href: '/articles/expo-crossplay-photo-share', label: 'Read More' },
     logo: logoOpenShuttle,
   },
   {
