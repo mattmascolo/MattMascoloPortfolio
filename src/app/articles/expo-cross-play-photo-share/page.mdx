@@ -1,0 +1,128 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+
+export const article = {
+  author: 'Matt Mascolo',
+  date: '2023-09-15',
+  title: 'Crossplay Photo Share: Bridging the iOS-Android Divide',
+  description:
+    'Explore the development of Crossplay Photo Share, a React Native app that solves the perennial problem of sharing high-resolution photos between iOS and Android devices.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+As a developer who's lived the frustration of trying to share high-quality photos between iOS and Android devices, I decided to tackle this problem head-on. The result is Crossplay Photo Share, a cross-platform mobile application that makes sharing full-resolution images between different mobile operating systems a breeze.
+
+## The Tech Stack
+
+Crossplay Photo Share is built with a modern, efficient tech stack:
+
+- **Expo & React Native**: For rapid development and cross-platform compatibility
+- **Supabase**: Handling authentication and PostgreSQL database management
+- **Expo FileSystem**: For local file operations
+- **Expo MediaLibrary**: To interact with the device's media library
+
+## Key Features and Technical Insights
+
+### 1. Cross-Platform File Handling
+
+One of the core challenges was ensuring consistent file handling across both iOS and Android. Here's a snippet that demonstrates how we download and save files:
+
+``javascript
+const downloadAll = async (user: any) => {
+  const { data } = await supabase.storage.from('files').list(user.id);
+  if (data && data.length > 0) {
+    for (const file of data) {
+      const response = await supabase.storage.from('files').download(`${user.id}/${file.name}`);
+      if (response.data) {
+        const fileLocalUri = FileSystem.documentDirectory + encodeURIComponent(file.name);
+        // ... file saving logic ...
+        await MediaLibrary.saveToLibraryAsync(fileLocalUri);
+      }
+    }
+  }
+};
+
+This function fetches all files for a user from Supabase storage, downloads them, and saves them to the device's media library, maintaining full resolution across platforms.
+
+### 2. Permissions Management
+
+Handling permissions was a significant challenge, especially given the differences between iOS and Android. We used Expo's permission APIs to ensure a smooth user experience:
+
+``json
+"plugins": [
+  [
+    "expo-image-picker",
+    {
+      "photosPermission": "Select and upload images.",
+      "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+      "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+    }
+  ],
+  [
+    "expo-media-library",
+    {
+      "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+      "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+      "isAccessMediaLocationEnabled": true
+    }
+  ]
+]
+
+This configuration in `app.json` ensures that we request the necessary permissions on both platforms, with user-friendly messages explaining why we need access to their media.
+
+### 3. Efficient Navigation with Expo Router
+
+We utilized Expo Router for navigation, which allowed for a more web-like navigation experience and easier deep linking:
+
+``javascript
+const StackLayout = () => {
+  return (
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#0f0f0f',
+        },
+        headerTintColor: '#fff',
+      }}>
+      <Stack.Screen
+        name="list"
+        options={{
+          title: ' ',
+          headerRight: () => (
+            <Button onPress={signOut} title="Log Out" color={'orange'}></Button>
+          ),
+          headerLeft: () => (
+            <Button onPress={() => downloadAll(user)} title="Download All" color={'grey'}></Button>
+          ),
+        }}></Stack.Screen>
+    </Stack>
+  );
+};
+
+This setup provides a consistent navigation experience across both platforms, with custom header buttons for key actions like logging out and batch downloading.
+
+## Overcoming Challenges
+
+The primary challenge was ensuring a seamless experience across both iOS and Android, especially when it came to file handling and permissions. iOS, in particular, required careful handling of photo library access.
+
+Another hurdle was optimizing the download and upload processes to handle large, high-resolution images efficiently. This required careful memory management and progress tracking to prevent app crashes or unresponsive UI.
+
+## Future Enhancements
+
+As Crossplay Photo Share evolves, I'm exploring several exciting additions:
+
+1. Implementing real-time photo syncing using Supabase's real-time capabilities
+2. Adding shared albums for collaborative photo collections
+3. Integrating AI-powered image tagging for easier photo organization
+4. Implementing end-to-end encryption for enhanced privacy
+
+## Conclusion
+
+Crossplay Photo Share demonstrates the power of React Native and Expo in creating cross-platform solutions that bridge the gap between iOS and Android. By tackling the common frustration of sharing high-quality photos between these platforms, this project showcases not just coding skills, but the ability to solve real-world problems through thoughtful application of technology.
+
+Feel free to explore the [GitHub repository](https://github.com/mattmascolo/crossplay-photo-share) for a closer look at the code.
