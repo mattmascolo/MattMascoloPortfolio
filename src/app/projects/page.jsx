@@ -5,6 +5,9 @@ import { SimpleLayout } from '@/components/SimpleLayout'
 import logoMWDesign from '@/images/logos/mwdesignlogo.png'
 import logoLearnArena from '@/images/logos/learnarena.png'
 import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
+import { Container } from '@/components/Container'
+import { getAllArticles } from '@/lib/getAllArticles'
+import { formatDate } from '@/lib/formatDate'
 
 const projects = [
   {
@@ -44,6 +47,21 @@ const projects = [
   },
 ]
 
+function Article({ article }) {
+  return (
+    <Card as="article">
+      <Card.Title href={`/articles/${article.slug}`}>
+        {article.title}
+      </Card.Title>
+      <Card.Eyebrow as="time" dateTime={article.date} decorate>
+        {formatDate(article.date)}
+      </Card.Eyebrow>
+      <Card.Description>{article.description}</Card.Description>
+      <Card.Cta>Read article</Card.Cta>
+    </Card>
+  )
+}
+
 function LinkIcon(props) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
@@ -60,7 +78,8 @@ export const metadata = {
   description: 'A Few Projects.',
 }
 
-export default function Projects() {
+export default async function Projects() {
+  let articles = (await getAllArticles()).slice(0, 4)
   return (
     <SimpleLayout
       title="A Few Projects."
@@ -91,6 +110,17 @@ export default function Projects() {
           </Card>
         ))}
       </ul>
+      <div className="mt-20 md:mt-24">
+        <h2 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100">
+          Recent Articles
+        </h2>
+        <div className='my-8'></div>
+          <div className="flex flex-col gap-16">
+            {articles.map((article) => (
+              <Article key={article.slug} article={article} />
+            ))}
+          </div>
+      </div>
     </SimpleLayout>
   )
 }

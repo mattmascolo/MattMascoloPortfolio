@@ -1,8 +1,11 @@
 import { ArticleLayout } from '@/components/ArticleLayout'
+import Image from 'next/image'
+import photoShareLogin from './photo-share-login.png'
+import photoSelection from './photo-selection.png'
 
 export const article = {
   author: 'Matt Mascolo',
-  date: '2023-09-15',
+  date: '2023-10-17',
   title: 'Crossplay Photo Share: Seamless Photo Sharing Across iOS and Android',
   description:
     'Explore the development of Crossplay Photo Share, a React Native app that solves the perennial problem of sharing high-resolution photos between iOS and Android devices.',
@@ -30,7 +33,7 @@ Crossplay Photo Share is built on a robust, modern tech stack:
 
 ### 1. Effortless Authentication with Supabase
 
-I implemented a clean, user-friendly authentication system using Supabase:
+<Image src={photoShareLogin} alt="" className="max-w-xs mx-auto" />
 
 ```javascript
 const onSignInPress = async () => {
@@ -149,6 +152,7 @@ This code showcases:
 ### 4. Sophisticated Media Handling
 
 The app handles both images and videos with equal proficiency:
+<Image src={photoSelection} alt="" className="max-w-xs mx-auto" />
 
 ```javascript
 const onSelectImages = async () => {
@@ -194,10 +198,8 @@ Another significant challenge was optimizing the download and upload processes t
 
 As I continue to develop Crossplay Photo Share, I'm excited about several potential enhancements:
 
-1. Implementing real-time photo syncing using Supabase's real-time capabilities
-2. Adding shared albums for collaborative photo collections
-3. Integrating AI-powered image tagging for easier photo organization
-4. Implementing end-to-end encryption for enhanced privacy
+- Implementing real-time photo syncing using Supabase's real-time capabilities
+- Adding shared albums for collaborative photo collections
 
 ## Conclusion
 
