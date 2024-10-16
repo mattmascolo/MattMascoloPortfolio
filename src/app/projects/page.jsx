@@ -8,6 +8,8 @@ import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
 import { Container } from '@/components/Container'
 import { getAllArticles } from '@/lib/getAllArticles'
 import { formatDate } from '@/lib/formatDate'
+import ShowcaseCard from '@/components/ShowcaseCard'
+import photoShareAppIcon from '@/images/logos/photo-share-app-icon.png'
 
 const projects = [
   {
@@ -29,7 +31,7 @@ const projects = [
     description:
       'React Native app that solves the perennial problem of sharing high-resolution photos between iOS and Android devices.',
     link: { href: '/articles/expo-crossplay-photo-share', label: 'Read More' },
-    logo: logoOpenShuttle,
+    logo: photoShareAppIcon,
   },
   {
     name: 'MW Website Design',
@@ -110,6 +112,9 @@ export default async function Projects() {
           </Card>
         ))}
       </ul>
+      {/* <div className="flex flex-col gap-8 my-8">
+        <ShowcaseCard />
+      </div> */}
       <div className="mt-20 md:mt-24">
         <h2 className="text-2xl font-semibold text-zinc-800 dark:text-zinc-100">
           Recent Articles

@@ -58,7 +58,7 @@ export default function About() {
         </div>
         <div className="lg:order-first lg:row-span-2">
           <h1 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-5xl">
-          I&apos;m Matt Mascolo. I build websites and applications. I live in Denver, Colorado.
+          I build web apps.
           </h1>
           <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
             <p>
@@ -71,7 +71,7 @@ export default function About() {
             Embedded in my professional DNA is a profound commitment to community service. This ethos manifested early in my career when I volunteered to build websites for local charities. It has since evolved into a more ambitious goal of reshaping education through Learn Arena, the competitive eLearning platform I co-founded. The platform aims to democratize learning by offering courses in various domains, including computer programming, data science, and philosophy. With an engaging competitive edge and the potential for learners to earn returns on their course investments, we aspire to make education as immersive and captivating as video games.
             </p>
             <p>
-            One of the most significant projects I&apos;ve undertaken was with the city of Memphis, TN, involving GIS technology. I developed a program that utilized both public and private data to map population distribution, employment status, and other metrics across Memphis. This work has been instrumental in aiding traffic and road planning, demonstrating how technology can address urban planning challenges.
+            Another project I&apos;ve undertaken was with the city of Memphis, TN, involving GIS technology. Utilizing both public and private data to map population distribution, employment status, and other metrics across Memphis. This work has been instrumental in aiding traffic and road planning, demonstrating how technology can address urban planning challenges.
             </p>
             <p>
             Overall, my career path has been an exploration of the intersections between technology, community service, and education. As a web developer, digital marketer, urban planner, and co-founder of Learn Arena, my journey is defined by the integration of these domains to foster positive social impact. Looking forward, I anticipate expanding Learn Arena&apos;s course offerings and fostering a vibrant learning community that breaks down traditional educational barriers.
