@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
 import logoMWDesign from '@/images/logos/mwdesignlogo.png'
+import waterMaterialLogo from '@/images/logos/water-material-icon.png'
 import logoLearnArena from '@/images/logos/learnarena.png'
 import logoOpenShuttle from '@/images/logos/open-shuttle.svg'
 import { Container } from '@/components/Container'
@@ -18,6 +19,13 @@ const projects = [
       'Take courses in computer programming, data science, and philosophy. Earn a return on your investment in each course by placing highly in your class.',
     link: { href: 'https://learnarena.com/', label: 'LearnArena.com' },
     logo: logoLearnArena,
+  },
+  {
+    name: 'Water Material by Address',
+    description:
+      'Web application built for a utility authority to allow customers to identify water service line materials at their address. Built with AWS technologies.',
+    link: { href: '/articles/water-material-by-address', label: 'Read More' },
+    logo: waterMaterialLogo,
   },
   {
     name: 'Using AI as a Dungeon Master',
