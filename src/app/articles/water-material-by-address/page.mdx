@@ -1,0 +1,282 @@
+import { ArticleLayout } from '@/components/ArticleLayout'
+import Image from 'next/image'
+import waterServiceDemo from '@/images/portfolio/gifs/water-service-identification-tool.webp'
+
+export const article = {
+  author: 'Matt Mascolo',
+  date: '2024-09-02',
+  title: 'Water Material by Address: A Comprehensive AWS-Powered Solution',
+  description:
+    'Dive into the development of a Water Service Line Identification tool for a regional utility authority, leveraging AWS Elastic Beanstalk, Lambda, and RDS to provide customers with crucial information about their water service materials.',
+}
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+}
+
+export default (props) => <ArticleLayout article={article} {...props} />
+
+As a full-stack developer passionate about creating impactful solutions, I recently built a Water Service Line Identification tool for a regional utility authority. This project showcases my ability to develop complex, user-friendly applications while leveraging cloud technologies to create efficient, scalable solutions for real-world problems.
+
+## Project Overview and Demonstration
+
+The utility authority, a multi-service utility provider serving a mid-sized city in Tennessee, needed a tool that would allow their customers to easily access information about their water service materials. The result is a web application that enables users to search for their address and instantly view details about their water service line materials, including whether any replacements or verifications are needed.
+
+<div>
+<Image
+  src={waterServiceDemo}
+  alt="Demonstration of the Water Service Line Identification tool"
+  width={550} 
+  height={550}
+  className='mx-auto'
+/>
+</div>
+
+As you can see, users can simply start typing their address, and the application provides real-time suggestions. Once an address is selected, the tool displays comprehensive information about both the customer-owned and utility-owned portions of the water service line.
+
+## Technical Stack: Leveraging the Power of AWS
+
+To create a robust, scalable, and secure solution, I chose a modern, cloud-based architecture:
+
+- **Frontend**: Alpine.js for reactive UI components
+- **Backend API**: Express.js deployed on AWS Elastic Beanstalk
+- **Database**: AWS RDS (PostgreSQL)
+- **ETL Process**: AWS Lambda with Python
+- **Infrastructure**: AWS VPC for enhanced security and performance
+
+This stack allows for a scalable architecture that can handle varying loads efficiently while maintaining high levels of security and performance.
+
+## Deep Dive into the Code
+
+### Backend API: Elastic Beanstalk and Express.js
+
+The core of the backend is an Express.js application deployed on AWS Elastic Beanstalk. This setup provides a scalable and easily manageable environment for our API. Here's a closer look at some key components:
+
+```javascript
+// server.js
+const express = require('express');
+const { Pool } = require('pg');
+const cors = require('cors');
+const fs = require('fs');
+require('dotenv').config();
+
+const app = express();
+app.use(cors());
+
+const pool = new Pool({
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: process.env.PGPORT,
+  ssl: {
+    rejectUnauthorized: false,
+    ca: fs.readFileSync('cert/us-east-2-bundle.pem').toString(),
+  },
+});
+
+app.get('/api/addresses', async (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT location_id, address FROM water_service_data WHERE address ILIKE $1 LIMIT 10',
+      [`%${query}%`]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching addresses', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/water_service_info', async (req, res) => {
+  const locationId = req.query.location_id;
+  if (!locationId) {
+    return res.status(400).json({ error: 'Location ID parameter is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      'SELECT water_service_info FROM water_service_data WHERE location_id = $1',
+      [locationId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No data found for the provided location ID' });
+    }
+    res.json(result.rows[0].water_service_info);
+  } catch (error) {
+    console.error('Error fetching water service info', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+```
+
+This Express.js application handles two main API endpoints:
+1. `/api/addresses` for address search functionality
+2. `/api/water_service_info` for retrieving detailed water service information
+
+The application uses a PostgreSQL connection pool to efficiently manage database connections and includes error handling to ensure robust operation.
+
+### ETL Process: AWS Lambda
+
+While the main API runs on Elastic Beanstalk, we use an AWS Lambda function for the nightly ETL (Extract, Transform, Load) process. This function is responsible for updating our database with the latest water service information. Here's a look at the core of this Lambda function:
+
+```python
+import os
+import json
+import requests
+import logging
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
+# Database connection setup
+DB_CONNECTION_STRING = (
+    f"postgresql+psycopg2://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@"
+    f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT', 5432)}/{os.getenv('DB_NAME')}"
+)
+engine = create_engine(DB_CONNECTION_STRING)
+Session = sessionmaker(bind=engine)
+
+def lambda_handler(event, context):
+    logger.info("Starting ETL process")
+    
+    # Authenticate with the data source API
+    token = authenticate_api()
+    if not token:
+        logger.error("Failed to authenticate with the API")
+        return {"statusCode": 500, "body": json.dumps("ETL process failed: Authentication error")}
+    
+    # Fetch new data
+    new_data = fetch_large_data(token)
+    if not new_data:
+        logger.error("No new data fetched")
+        return {"statusCode": 500, "body": json.dumps("ETL process failed: No new data")}
+    
+    # Insert new data into the database
+    insert_data_to_postgres(new_data)
+    
+    logger.info("ETL process completed successfully")
+    return {"statusCode": 200, "body": json.dumps("ETL process completed successfully")}
+
+# Helper functions (authenticate_api, fetch_large_data, insert_data_to_postgres) would be implemented here
+```
+
+This Lambda function runs on a schedule, fetching new data from an external API and updating our PostgreSQL database. It uses SQLAlchemy for database operations and includes robust error handling and logging.
+
+### Frontend: Alpine.js for Reactive UI
+
+On the frontend, Alpine.js provides a lightweight yet powerful way to create reactive components. Here's an example of how the address search functionality is implemented:
+
+```html
+<div x-data="waterService()">
+  <input 
+    type="text" 
+    x-model="query" 
+    x-on:input="fetchAddresses()" 
+    placeholder="Begin typing your address"
+  />
+  <ul id="suggestions">
+    <template x-for="address in addresses" :key="address.location_id">
+      <li x-text="address.address" x-on:click="selectAddress(address)"></li>
+    </template>
+  </ul>
+  
+  <div x-show="waterServiceInfo">
+    <h3>Water Service Information</h3>
+    <p>
+      Customer Material: 
+      <span 
+        x-text="waterServiceInfo.customerMaterial" 
+        :class="{
+          'highlight-replace': waterServiceInfo.customerMaterial === 'Lead' || waterServiceInfo.customerMaterial === 'Galvanized',
+          'highlight': waterServiceInfo.customerMaterial === 'Unknown',
+          'highlight-optional': ['Non-Lead - Copper', 'Non-Lead - PVC', 'Non-Lead'].includes(waterServiceInfo.customerMaterial)
+        }"
+      ></span>
+    </p>
+    <!-- More water service info display -->
+  </div>
+</div>
+
+<script>
+function waterService() {
+  return {
+    query: '',
+    addresses: [],
+    waterServiceInfo: null,
+    async fetchAddresses() {
+      if (this.query.length < 3) {
+        this.addresses = [];
+        return;
+      }
+      try {
+        const response = await fetch(`/api/addresses?q=${this.query}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        this.addresses = await response.json();
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+        this.addresses = [];
+      }
+    },
+    async selectAddress(address) {
+      this.query = address.address;
+      this.addresses = [];
+      try {
+        const response = await fetch(`/api/water_service_info?location_id=${address.location_id}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        this.waterServiceInfo = await response.json();
+      } catch (error) {
+        console.error('Error fetching water service info:', error);
+        this.waterServiceInfo = null;
+      }
+    }
+  };
+}
+</script>
+```
+
+This code creates a reactive component that handles the address search, suggestion display, and water service information retrieval. The use of Alpine.js allows for a smooth, responsive user experience without the need for a heavier framework.
+
+## Impact and Future Enhancements
+
+The Water Service Line Identification tool has significantly improved the utility authority's ability to inform customers about their water service materials. It has also enhanced their data collection process, as customers can submit information about previously unknown materials through the integrated plumbing survey.
+
+Looking forward, there are several potential enhancements for the tool:
+
+1. Implement real-time updates for water service information.
+2. Integrate with the utility's work order system for automated scheduling of replacements.
+3. Expand the tool to cover other utility services provided by the authority.
+
+## Conclusion
+
+This project demonstrates my ability to create full-stack applications that solve real-world problems using cloud technologies. By leveraging AWS services like Elastic Beanstalk and Lambda, implementing efficient data querying, and creating an intuitive user interface, I delivered a solution that meets both technical requirements and user needs.
+
+The Water Service Line Identification tool showcases my skills in:
+
+- Cloud architecture design with AWS
+- Deploying and managing applications with Elastic Beanstalk
+- Creating ETL processes using AWS Lambda
+- Database integration and optimization with RDS
+- Frontend development with modern JavaScript frameworks
+- API design and implementation with Express.js
+- Security considerations in web application development
+
+As I continue to grow as a developer, I look forward to taking on more challenges that allow me to create impactful solutions using cutting-edge technologies.
