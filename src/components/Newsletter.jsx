@@ -1,32 +1,19 @@
 'use client';
 import { subscribeToNewsletter } from '@/app/actions';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Newsletter() {
-  const [status, setStatus] = useState('idle');
-  const [message, setMessage] = useState('');
+  const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setStatus('submitting');
-    
     const formData = new FormData(e.target);
-    try {
-      const result = await subscribeToNewsletter(formData);
-      if (result.success) {
-        setStatus('success');
-        setMessage('Thanks for subscribing!');
-        e.target.reset();
-      } else {
-        setStatus('error');
-        setMessage(result.error || 'Something went wrong');
-      }
-    } catch (error) {
-      setStatus('error');
-      setMessage('Failed to subscribe');
-    } finally {
-      setTimeout(() => setStatus('idle'), 3000);
-    }
+    
+    // Start the submission in the background
+    subscribeToNewsletter(formData).catch(console.error);
+    
+    // Redirect immediately, don't wait for the result
+    router.push('/thank-you');
   }
 
   return (
@@ -69,17 +56,11 @@ export default function Newsletter() {
         />
         <button
           type="submit"
-          disabled={status === 'submitting'}
-          className="ml-4 flex-none rounded-md bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 disabled:opacity-50"
+          className="ml-4 flex-none rounded-md bg-zinc-900 px-3 py-2 text-sm font-semibold text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
-          {status === 'submitting' ? 'Joining...' : 'Join'}
+          Join
         </button>
       </div>
-      {message && (
-        <p className={`mt-2 text-sm ${status === 'error' ? 'text-red-500' : 'text-green-500'}`}>
-          {message}
-        </p>
-      )}
     </form>
   );
 }
