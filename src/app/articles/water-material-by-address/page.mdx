@@ -51,31 +51,24 @@ This stack allows for a scalable architecture that can handle varying loads effi
 
 ### Backend API: Elastic Beanstalk and Express.js
 
-The core of the backend is an Express.js application deployed on AWS Elastic Beanstalk. This setup provides a scalable and easily manageable environment for our API. Here's a closer look at some key components:
+The core of the backend is an Express.js application deployed on AWS Elastic Beanstalk. This setup provides a scalable and easily manageable environment for our API:
 
 ```javascript
 // server.js
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 
+// Configure database connection using environment variables
 const pool = new Pool({
-  user: process.env.PGUSER,
-  host: process.env.PGHOST,
-  database: process.env.PGDATABASE,
-  password: process.env.PGPASSWORD,
-  port: process.env.PGPORT,
-  ssl: {
-    rejectUnauthorized: false,
-    ca: fs.readFileSync('cert/us-east-2-bundle.pem').toString(),
-  },
+  // Configuration loaded from environment variables
 });
 
+// Address search endpoint
 app.get('/api/addresses', async (req, res) => {
   const query = req.query.q;
   if (!query) {
@@ -84,16 +77,17 @@ app.get('/api/addresses', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT location_id, address FROM water_service_data WHERE address ILIKE $1 LIMIT 10',
+      'SELECT address_data FROM addresses WHERE address ILIKE $1',
       [`%${query}%`]
     );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching addresses', error);
+    console.error('Error fetching addresses');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// Water service information endpoint
 app.get('/api/water_service_info', async (req, res) => {
   const locationId = req.query.location_id;
   if (!locationId) {
@@ -102,15 +96,15 @@ app.get('/api/water_service_info', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT water_service_info FROM water_service_data WHERE location_id = $1',
+      'SELECT service_info FROM water_services WHERE id = $1',
       [locationId]
     );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No data found for the provided location ID' });
+      return res.status(404).json({ error: 'No data found' });
     }
-    res.json(result.rows[0].water_service_info);
+    res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching water service info', error);
+    console.error('Error fetching water service info');
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -121,69 +115,72 @@ app.listen(port, () => {
 });
 ```
 
-This Express.js application handles two main API endpoints:
-1. `/api/addresses` for address search functionality
-2. `/api/water_service_info` for retrieving detailed water service information
-
-The application uses a PostgreSQL connection pool to efficiently manage database connections and includes error handling to ensure robust operation.
+The Express.js application handles two main API endpoints, implementing proper error handling and security practices while maintaining clean, maintainable code.
 
 ### ETL Process: AWS Lambda
 
-While the main API runs on Elastic Beanstalk, we use an AWS Lambda function for the nightly ETL (Extract, Transform, Load) process. This function is responsible for updating our database with the latest water service information. Here's a look at the core of this Lambda function:
+For the nightly ETL (Extract, Transform, Load) process, we use an AWS Lambda function. Here's a look at the core implementation:
 
 ```python
 import os
 import json
-import requests
 import logging
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
-
-# Database connection setup
-DB_CONNECTION_STRING = (
-    f"postgresql+psycopg2://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@"
-    f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT', 5432)}/{os.getenv('DB_NAME')}"
-)
-engine = create_engine(DB_CONNECTION_STRING)
-Session = sessionmaker(bind=engine)
+logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
+    """
+    Main Lambda handler for the ETL process
+    """
     logger.info("Starting ETL process")
     
-    # Authenticate with the data source API
-    token = authenticate_api()
-    if not token:
-        logger.error("Failed to authenticate with the API")
-        return {"statusCode": 500, "body": json.dumps("ETL process failed: Authentication error")}
-    
-    # Fetch new data
-    new_data = fetch_large_data(token)
-    if not new_data:
-        logger.error("No new data fetched")
-        return {"statusCode": 500, "body": json.dumps("ETL process failed: No new data")}
-    
-    # Insert new data into the database
-    insert_data_to_postgres(new_data)
-    
-    logger.info("ETL process completed successfully")
-    return {"statusCode": 200, "body": json.dumps("ETL process completed successfully")}
+    try:
+        # Initialize database connection
+        engine = create_engine(os.getenv('DATABASE_URL'))
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        
+        # Process data
+        process_new_data(session)
+        
+        session.close()
+        return {
+            "statusCode": 200,
+            "body": json.dumps("ETL process completed successfully")
+        }
+    except Exception as e:
+        logger.error(f"ETL process failed: {str(e)}")
+        return {
+            "statusCode": 500,
+            "body": json.dumps("ETL process failed")
+        }
 
-# Helper functions (authenticate_api, fetch_large_data, insert_data_to_postgres) would be implemented here
+def process_new_data(session):
+    """
+    Process and update water service data
+    """
+    try:
+        # Fetch new data from source
+        new_data = fetch_data_from_source()
+        
+        # Transform and validate data
+        transformed_data = transform_data(new_data)
+        
+        # Update database
+        update_database(session, transformed_data)
+        
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
 ```
-
-This Lambda function runs on a schedule, fetching new data from an external API and updating our PostgreSQL database. It uses SQLAlchemy for database operations and includes robust error handling and logging.
 
 ### Frontend: Alpine.js for Reactive UI
 
-On the frontend, Alpine.js provides a lightweight yet powerful way to create reactive components. Here's an example of how the address search functionality is implemented:
+The frontend implementation uses Alpine.js to create a responsive and user-friendly interface:
 
 ```html
 <div x-data="waterService()">
@@ -193,9 +190,10 @@ On the frontend, Alpine.js provides a lightweight yet powerful way to create rea
     x-on:input="fetchAddresses()" 
     placeholder="Begin typing your address"
   />
+  
   <ul id="suggestions">
-    <template x-for="address in addresses" :key="address.location_id">
-      <li x-text="address.address" x-on:click="selectAddress(address)"></li>
+    <template x-for="address in addresses" :key="address.id">
+      <li x-text="address.display_address" x-on:click="selectAddress(address)"></li>
     </template>
   </ul>
   
@@ -205,14 +203,16 @@ On the frontend, Alpine.js provides a lightweight yet powerful way to create rea
       Customer Material: 
       <span 
         x-text="waterServiceInfo.customerMaterial" 
-        :class="{
-          'highlight-replace': waterServiceInfo.customerMaterial === 'Lead' || waterServiceInfo.customerMaterial === 'Galvanized',
-          'highlight': waterServiceInfo.customerMaterial === 'Unknown',
-          'highlight-optional': ['Non-Lead - Copper', 'Non-Lead - PVC', 'Non-Lead'].includes(waterServiceInfo.customerMaterial)
-        }"
+        :class="getMaterialClass(waterServiceInfo.customerMaterial)"
       ></span>
     </p>
-    <!-- More water service info display -->
+    <p>
+      Utility Material: 
+      <span 
+        x-text="waterServiceInfo.utilityMaterial" 
+        :class="getMaterialClass(waterServiceInfo.utilityMaterial)"
+      ></span>
+    </p>
   </div>
 </div>
 
@@ -222,38 +222,48 @@ function waterService() {
     query: '',
     addresses: [],
     waterServiceInfo: null,
+    
     async fetchAddresses() {
       if (this.query.length < 3) {
         this.addresses = [];
         return;
       }
+      
       try {
-        const response = await fetch(`/api/addresses?q=${this.query}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch(`/api/addresses?q=${encodeURIComponent(this.query)}`);
+        if (!response.ok) throw new Error('Failed to fetch addresses');
         this.addresses = await response.json();
       } catch (error) {
-        console.error('Error fetching addresses:', error);
+        console.error('Error fetching addresses');
         this.addresses = [];
       }
     },
+    
     async selectAddress(address) {
-      this.query = address.address;
+      this.query = address.display_address;
       this.addresses = [];
+      
       try {
-        const response = await fetch(`/api/water_service_info?location_id=${address.location_id}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch(`/api/water_service_info?location_id=${address.id}`);
+        if (!response.ok) throw new Error('Failed to fetch water service info');
         this.waterServiceInfo = await response.json();
       } catch (error) {
-        console.error('Error fetching water service info:', error);
+        console.error('Error fetching water service info');
         this.waterServiceInfo = null;
       }
+    },
+    
+    getMaterialClass(material) {
+      return {
+        'highlight-replace': ['Lead', 'Galvanized'].includes(material),
+        'highlight': material === 'Unknown',
+        'highlight-optional': material.startsWith('Non-Lead')
+      };
     }
   };
 }
 </script>
 ```
-
-This code creates a reactive component that handles the address search, suggestion display, and water service information retrieval. The use of Alpine.js allows for a smooth, responsive user experience without the need for a heavier framework.
 
 ## Impact and Future Enhancements
 
@@ -261,9 +271,9 @@ The Water Service Line Identification tool has significantly improved the utilit
 
 Looking forward, there are several potential enhancements for the tool:
 
-1. Implement real-time updates for water service information.
-2. Integrate with the utility's work order system for automated scheduling of replacements.
-3. Expand the tool to cover other utility services provided by the authority.
+1. Implement real-time updates for water service information
+2. Integrate with the utility's work order system for automated scheduling of replacements
+3. Expand the tool to cover other utility services provided by the authority
 
 ## Conclusion
 
@@ -278,5 +288,3 @@ The Water Service Line Identification tool showcases my skills in:
 - Frontend development with modern JavaScript frameworks
 - API design and implementation with Express.js
 - Security considerations in web application development
-
-As I continue to grow as a developer, I look forward to taking on more challenges that allow me to create impactful solutions using cutting-edge technologies.
