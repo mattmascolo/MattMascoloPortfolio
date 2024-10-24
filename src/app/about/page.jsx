@@ -62,7 +62,7 @@ export default function About() {
           </h1>
           <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
             <p>
-            I&apos;m Matt Mascolo, a dedicated web developer with a knack for transforming complex concepts into engaging digital experiences. My developer journey began in 2015, when I created my first iPhone application. It was a moment of revelation that not only ignited my passion for coding but also revealed the transformative potential of technology.
+            I&apos;m Matt Mascolo, a dedicated web developer with a knack for transforming complex concepts into engaging digital experiences. My developer journey began in 2014, when I created my first iPhone application. It was just a fun game for friends, but it was the spark that started my love for programming.
             </p>
             <p>
             Since stepping into the world of web development, I&apos;ve made it my mission to design unique and dynamic digital experiences. My broad-ranging portfolio reflects this commitment, encompassing projects as varied as creating websites for local charities to establishing digital platforms for major utility companies. I have directly developed around 100 websites and overseen the management of an additional 300, acquiring in-depth experience in diverse aspects of the field. Beyond the building and hosting of websites, my expertise extends to digital marketing, where I&apos;ve gained experience in recording, editing, and producing podcasts. This fusion of technical and creative skills has granted me a holistic understanding of digital communication and continues to fuel my passion for the field.
