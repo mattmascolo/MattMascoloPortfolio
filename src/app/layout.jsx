@@ -10,7 +10,7 @@ export const metadata = {
       'Matt Mascolo - Web Developer, co-founder, and lifelong learner.',
   },
   description:
-    'I&apos;m Matt Mascolo, a seasoned web developer and entrepreneur based out of Colorado. As the co-founder of Learn Arena, we&apos;re focused on leveraging technology to democratize education, providing people with a competitive, engaging platform to learn and grow on their own terms.',
+    'I&apos;m Matt Mascolo, a seasoned web developer and entrepreneur based out of Chattanooga, TN. As the co-founder of Learn Arena, we&apos;re focused on leveraging technology to democratize education, providing people with a competitive, engaging platform to learn and grow on their own terms.',
   alternates: {
     types: {
       'application/rss+xml': `${process.env.NEXT_PUBLIC_SITE_URL}/feed.xml`,

@@ -39,7 +39,7 @@ function MailIcon(props) {
 export const metadata = {
   title: 'About',
   description:
-    'I&apos;m Matt Mascolo. I live in Denver, Colorado.',
+    'I&apos;m Matt Mascolo. I live in Chattanooga, Tennessee.',
 }
 
 export default function About() {
